@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CO₂ Panelis | Datu Skats</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .back-button {
+            max-width: 1400px;
+            margin: 0 auto 20px;
+            text-align: left;
+        }
+
+        .back-button a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            color: #2e7d32;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-button a:hover {
+            background: #2e7d32;
+            color: white;
+            transform: translateX(-3px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2e7d32 0%, #388e3c 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .co2-info {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            margin: 20px 30px;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .co2-info h3 {
+            color: #e65100;
+            margin-bottom: 12px;
+            font-size: 1.2em;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .info-level {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .info-desc {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .level-excellent { color: #2e7d32; }
+        .level-good { color: #689f38; }
+        .level-moderate { color: #ff9800; }
+        .level-poor { color: #f57c00; }
+        .level-bad { color: #d32f2f; }
+        .level-danger { color: #c62828; font-weight: bold; }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f1f8e9;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(46, 125, 50, 0.1);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 600;
+            color: #2e7d32;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #558b2f;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .filter-section {
+            padding: 20px 30px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-section label {
+            font-weight: 600;
+            color: #2e7d32;
+            font-size: 1em;
+        }
+
+        .filter-section select {
+            padding: 12px 20px;
+            border: 2px solid #c8e6c9;
+            border-radius: 12px;
+            font-size: 1em;
+            min-width: 250px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            color: #1b5e20;
+            background: white;
+        }
+
+        .filter-section select:hover {
+            border-color: #2e7d32;
+        }
+
+        .filter-section select:focus {
+            outline: none;
+            border-color: #2e7d32;
+        }
+
+        .filter-section button {
+            padding: 12px 30px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .filter-section button:hover {
+            background: #1b5e20;
+        }
+
+        .filter-section button.secondary {
+            background: #ff9800;
+        }
+
+        .filter-section button.secondary:hover {
+            background: #f57c00;
+        }
+
+        .filter-section button.primary {
+            background: #2e7d32;
+        }
+
+        .data-section {
+            padding: 20px 30px 30px;
+            background: white;
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            color: #1b5e20;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .record-count {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 6px 20px;
+            border-radius: 30px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid #e0e0e0;
+            display: none;
+        }
+
+        .table-container.show {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: #e8f5e9;
+            color: #1b5e20;
+            padding: 16px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: #c8e6c9;
+        }
+
+        td {
+            padding: 14px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .co2-value {
+            font-weight: 600;
+        }
+
+        .co2-excellent { color: #2e7d32; }
+        .co2-good { color: #689f38; }
+        .co2-moderate { color: #ff9800; }
+        .co2-poor { color: #f57c00; }
+        .co2-bad { color: #d32f2f; }
+        .co2-danger { color: #c62828; font-weight: bold; }
+
+        .filter-result {
+            margin: 0 30px 20px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .filter-result.show {
+            display: block;
+        }
+
+        .filter-result.success {
+            background: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            color: #1b5e20;
+        }
+
+        .filter-result.error {
+            background: #ffebee;
+            border: 1px solid #ffcdd2;
+            color: #b71c1c;
+        }
+
+        .filter-result.info {
+            background: #e3f2fd;
+            border: 1px solid #bbdef5;
+            color: #0d47a1;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .loading-spinner {
+            border: 3px solid #e8f5e9;
+            border-top: 3px solid #2e7d32;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .button-container {
+            text-align: center;
+            padding: 40px 30px;
+        }
+
+        .info-message {
+            text-align: center;
+            padding: 40px 30px;
+            background: #f9f9f9;
+            border-radius: 16px;
+            margin: 20px 0;
+        }
+
+        .info-message .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .info-message h3 {
+            color: #1b5e20;
+            margin-bottom: 10px;
+        }
+
+        .info-message p {
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-section select,
+            .filter-section button {
+                width: 100%;
+            }
+            
+            .section-title {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="back-button">
+        <a href="/">← Atpakaļ uz sākumu</a>
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>📋 CO₂ Datu Pārvaldība</h1>
+            <p>Skatīt, filtrēt un analizēt oglekļa dioksīda mērījumus</p>
+        </div>
+
+        <div class="co2-info">
+            <h3>🌿 CO₂ Līmeņa Vadlīnijas</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-level level-excellent">420 ppm</div>
+                    <div class="info-desc">Svaiga gaisa bāzes līmenis</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-level level-good">420 - 1000 ppm</div>
+                    <div class="info-desc">Laba gaisa kvalitāte</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-level level-moderate">1000 - 2000 ppm</div>
+                    <div class="info-desc">Gaisa kvalitāte pasliktinās</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-level level-poor">2000 - 3000 ppm</div>
+                    <div class="info-desc">Būtiski pasliktinājusies</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-level level-bad">3000 - 5000 ppm</div>
+                    <div class="info-desc">Veselības apdraudējums ilgstošas uzturēšanās gadījumā</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-level level-danger">&gt; 5000 ppm</div>
+                    <div class="info-desc">Bīstama koncentrācija!</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-container" id="statsContainer" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-value" id="totalRecords">0</div>
+                <div class="stat-label">Kopējie Mērījumi</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgCo2">0</div>
+                <div class="stat-label">Vidējais CO₂ (ppm)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="minCo2">0</div>
+                <div class="stat-label">Minimālais CO₂ (ppm)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="maxCo2">0</div>
+                <div class="stat-label">Maksimālais CO₂ (ppm)</div>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <label for="daySelect">Filtrēt pēc dienas:</label>
+            <select id="daySelect">
+                <option value="">Izvēlieties dienu...</option>
+            </select>
+            <button onclick="filterData()" id="filterBtn">🔍 Pielietot Filtru</button>
+            <button onclick="loadOverallInfo()" id="overallBtn" class="secondary">📊 Rādīt Visu Informāciju</button>
+        </div>
+
+        <div id="filterResult" class="filter-result"></div>
+
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Ielādē datus...</p>
+        </div>
+
+        <div id="infoMessage" class="info-message">
+            <div class="icon">📊</div>
+            <h3>Gatavs Datu Analīzei</h3>
+            <p>Izvēlieties dienu no saraksta un noklikšķiniet "Pielietot Filtru", lai skatītu CO₂ mērījumus konkrētai dienai, vai noklikšķiniet "Rādīt Visu Informāciju", lai redzētu pilnu statistiku</p>
+        </div>
+
+        <div class="data-section" id="dataSection" style="display: none;">
+            <div class="section-title">
+                <span>📋 Mērījumu Ieraksti</span>
+                <span class="record-count" id="recordCount">0 ieraksti</span>
+            </div>
+            
+            <div class="table-container" id="tableContainer">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">Indekss</th>
+                            <th onclick="sortTable(1)">Diena</th>
+                            <th onclick="sortTable(2)">CO₂ Līmenis (ppm)</th>
+                            <th>Gaisa Kvalitāte</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentData = [];
+        let allDays = [];
+        let currentFilterDay = null;
+        let sortColumn = 0;
+        let sortDirection = 'asc';
+        
+        function getCO2Class(co2) {
+            if (co2 === 420) return 'co2-excellent';
+            if (co2 < 1000) return 'co2-good';
+            if (co2 < 2000) return 'co2-moderate';
+            if (co2 < 3000) return 'co2-poor';
+            if (co2 < 5000) return 'co2-bad';
+            return 'co2-danger';
+        }
+        
+        function getAirQualityDescription(co2) {
+            if (co2 === 420) return 'Svaiga gaisa bāzes līmenis';
+            if (co2 < 1000) return 'Laba gaisa kvalitāte';
+            if (co2 < 2000) return 'Gaisa kvalitāte pasliktinās';
+            if (co2 < 3000) return 'Būtiski pasliktinājusies';
+            if (co2 < 5000) return 'Iespējami veselības apdraudējumi';
+            return 'BĪSTAMA KONCENTRĀCIJA!';
+        }
+        
+        function updateTable(data) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            
+            if (data.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="4" style="text-align: center; padding: 40px;">Nav datu par izvēlēto dienu</td>';
+                tableBody.appendChild(row);
+                document.getElementById('recordCount').textContent = '0 ieraksti';
+                return;
+            }
+            
+            data.forEach(record => {
+                const row = document.createElement('tr');
+                const co2Class = getCO2Class(record.CO2);
+                const qualityDesc = getAirQualityDescription(record.CO2);
+                row.innerHTML = `
+                    <td>${record.index}</td>
+                    <td><strong>Diena ${record.Day}</strong></td>
+                    <td class="co2-value ${co2Class}">${record.CO2} ppm</td>
+                    <td>${qualityDesc}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            document.getElementById('recordCount').textContent = data.length + ' ieraksti';
+        }
+        
+        function sortTable(column) {
+            if (currentData.length === 0) return;
+            
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+            
+            const sortedData = [...currentData].sort((a, b) => {
+                let aVal, bVal;
+                if (column === 0) {
+                    aVal = a.index;
+                    bVal = b.index;
+                } else if (column === 1) {
+                    aVal = a.Day;
+                    bVal = b.Day;
+                } else {
+                    aVal = a.CO2;
+                    bVal = b.CO2;
+                }
+                
+                if (sortDirection === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                } else {
+                    return aVal < bVal ? 1 : -1;
+                }
+            });
+            
+            updateTable(sortedData);
+        }
+        
+        function updateStatistics(data) {
+            if (data.length === 0) return;
+            
+            const co2Values = data.map(d => d.CO2);
+            const total = data.length;
+            const avg = (co2Values.reduce((a, b) => a + b, 0) / total).toFixed(2);
+            const min = Math.min(...co2Values);
+            const max = Math.max(...co2Values);
+            
+            document.getElementById('totalRecords').textContent = total;
+            document.getElementById('avgCo2').textContent = avg;
+            document.getElementById('minCo2').textContent = min;
+            document.getElementById('maxCo2').textContent = max;
+        }
+        
+        function loadOverallInfo() {
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('infoMessage').style.display = 'none';
+            document.getElementById('filterResult').classList.remove('show');
+            
+            fetch('/api/data')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').classList.remove('show');
+                
+                currentData = data;
+                currentFilterDay = null;
+                
+                document.getElementById('dataSection').style.display = 'block';
+                document.getElementById('statsContainer').style.display = 'grid';
+                document.getElementById('tableContainer').classList.add('show');
+                document.getElementById('daySelect').value = '';
+                
+                updateTable(currentData);
+                updateStatistics(currentData);
+                sortColumn = 0;
+                sortDirection = 'asc';
+                
+                const filterResult = document.getElementById('filterResult');
+                filterResult.className = 'filter-result show success';
+                filterResult.innerHTML = `✅ Rāda visus ${data.length} ierakstus. Vidējais CO₂: ${(currentData.reduce((sum, d) => sum + d.CO2, 0) / currentData.length).toFixed(2)} ppm`;
+                
+                setTimeout(() => {
+                    filterResult.classList.remove('show');
+                }, 4000);
+            })
+            .catch(error => {
+                document.getElementById('loading').classList.remove('show');
+                const filterResult = document.getElementById('filterResult');
+                filterResult.className = 'filter-result show error';
+                filterResult.innerHTML = `❌ Kļūda ielādējot datus: ${error}`;
+            });
+        }
+        
+        function filterData() {
+            const daySelect = document.getElementById('daySelect');
+            const selectedDay = daySelect.value;
+            
+            if (!selectedDay) {
+                const filterResult = document.getElementById('filterResult');
+                filterResult.className = 'filter-result show error';
+                filterResult.innerHTML = `❌ Lūdzu, izvēlieties dienu no saraksta.`;
+                setTimeout(() => {
+                    filterResult.classList.remove('show');
+                }, 3000);
+                return;
+            }
+            
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('infoMessage').style.display = 'none';
+            document.getElementById('filterResult').classList.remove('show');
+            
+            const formData = new FormData();
+            formData.append('day', selectedDay);
+            
+            fetch('/filter', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').classList.remove('show');
+                
+                if (data.success) {
+                    currentData = data.data;
+                    currentFilterDay = selectedDay;
+                    
+                    document.getElementById('dataSection').style.display = 'block';
+                    document.getElementById('statsContainer').style.display = 'grid';
+                    document.getElementById('tableContainer').classList.add('show');
+                    
+                    updateTable(currentData);
+                    updateStatistics(currentData);
+                    sortColumn = 0;
+                    sortDirection = 'asc';
+                    
+                    const filterResult = document.getElementById('filterResult');
+                    filterResult.className = 'filter-result show success';
+                    
+                    let qualityMessage = '';
+                    if (data.stats.avg_co2 < 1000) {
+                        qualityMessage = 'Laba gaisa kvalitāte';
+                    } else if (data.stats.avg_co2 < 2000) {
+                        qualityMessage = 'Gaisa kvalitāte pasliktinās';
+                    } else if (data.stats.avg_co2 < 3000) {
+                        qualityMessage = 'Būtiski pasliktinājusies';
+                    } else {
+                        qualityMessage = 'Slikta gaisa kvalitāte - veselības apdraudējums';
+                    }
+                    
+                    filterResult.innerHTML = `✅ Diena ${data.day}: ${data.count} mērījums(i)<br>📊 Vidējais: ${data.stats.avg_co2} ppm | Diapazons: ${data.stats.min_co2} - ${data.stats.max_co2} ppm<br>🌿 ${qualityMessage}`;
+                } else {
+                    const filterResult = document.getElementById('filterResult');
+                    filterResult.className = 'filter-result show error';
+                    filterResult.innerHTML = `❌ ${data.message}`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading').classList.remove('show');
+                const filterResult = document.getElementById('filterResult');
+                filterResult.className = 'filter-result show error';
+                filterResult.innerHTML = `❌ Kļūda: ${error}`;
+            });
+        }
+        
+        function loadDays() {
+            fetch('/api/data')
+            .then(response => response.json())
+            .then(data => {
+                const days = [...new Set(data.map(d => d.Day))].sort((a, b) => a - b);
+                const daySelect = document.getElementById('daySelect');
+                
+                days.forEach(day => {
+                    const option = document.createElement('option');
+                    option.value = day;
+                    option.textContent = `Diena ${day}`;
+                    daySelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Kļūda ielādējot dienas:', error);
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDays();
+        });
+    </script>
+</body>
+</html>
