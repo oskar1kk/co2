@@ -174,5 +174,50 @@ def get_all_data():
     data = load_co2_data()
     return jsonify(data)
 
+@app.route('/api/check-alerts')
+def check_alerts():
+    """Check if any CO2 levels exceed thresholds"""
+    data = load_co2_data()
+    
+    thresholds = {
+        'warning': 1000,   # Gaisa kvalitāte pasliktinās
+        'critical': 2000,  # Būtiski pasliktinājusies
+        'danger': 3000     # Veselības apdraudējums
+    }
+    
+    alerts = []
+    for record in data:
+        co2 = record['CO2']
+        if co2 >= thresholds['danger']:
+            alerts.append({
+                'day': record['Day'],
+                'co2': co2,
+                'level': 'danger',
+                'message': 'BĪSTAMI! CO₂ līmenis pārsniedz 3000 ppm! Nekavējoties vēdiniet telpu!'
+            })
+        elif co2 >= thresholds['critical']:
+            alerts.append({
+                'day': record['Day'],
+                'co2': co2,
+                'level': 'critical',
+                'message': f'BRĪDINĀJUMS! CO₂ līmenis {co2} ppm pārsniedz 2000 ppm. Gaisa kvalitāte ir būtiski pasliktinājusies.'
+            })
+        elif co2 >= thresholds['warning']:
+            alerts.append({
+                'day': record['Day'],
+                'co2': co2,
+                'level': 'warning',
+                'message': f'Uzmanību! CO₂ līmenis {co2} ppm pārsniedz 1000 ppm. Ieteicams vēdināt telpu.'
+            })
+    
+    # Atgriež tikai pēdējos 5 brīdinājumus
+    return jsonify({
+        'alerts': alerts[-5:],
+        'total_alerts': len(alerts),
+        'warning_count': len([a for a in alerts if a['level'] == 'warning']),
+        'critical_count': len([a for a in alerts if a['level'] == 'critical']),
+        'danger_count': len([a for a in alerts if a['level'] == 'danger'])
+    })
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

@@ -72,6 +72,37 @@
             font-weight: 300;
         }
 
+        .alert-panel {
+            margin: 20px 30px;
+            display: none;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .alert-critical {
+            background: #ffe5b4;
+            border-left: 4px solid #ff9800;
+        }
+
+        .alert-danger {
+            background: #ffcccc;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert strong {
+            font-size: 1.1em;
+        }
+
         .co2-info {
             background: #fff3e0;
             border-left: 4px solid #ff9800;
@@ -215,10 +246,6 @@
             background: #f57c00;
         }
 
-        .filter-section button.primary {
-            background: #2e7d32;
-        }
-
         .data-section {
             padding: 20px 30px 30px;
             background: white;
@@ -356,11 +383,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        .button-container {
-            text-align: center;
-            padding: 40px 30px;
-        }
-
         .info-message {
             text-align: center;
             padding: 40px 30px;
@@ -422,6 +444,19 @@
         <div class="header">
             <h1>📋 CO₂ Datu Pārvaldība</h1>
             <p>Skatīt, filtrēt un analizēt oglekļa dioksīda mērījumus</p>
+        </div>
+
+        <!-- Alert System Panel -->
+        <div id="alertPanel" class="alert-panel">
+            <div id="warningAlert" class="alert alert-warning">
+                <strong>⚠️ BRĪDINĀJUMS:</strong> <span id="warningMessage"></span>
+            </div>
+            <div id="criticalAlert" class="alert alert-critical">
+                <strong>🔴 KRITISKS BRĪDINĀJUMS:</strong> <span id="criticalMessage"></span>
+            </div>
+            <div id="dangerAlert" class="alert alert-danger">
+                <strong>💀 BĪSTAMI:</strong> <span id="dangerMessage"></span>
+            </div>
         </div>
 
         <div class="co2-info">
@@ -619,6 +654,41 @@
             document.getElementById('maxCo2').textContent = max;
         }
         
+        function checkAlerts() {
+            fetch('/api/check-alerts')
+                .then(response => response.json())
+                .then(data => {
+                    const alertPanel = document.getElementById('alertPanel');
+                    const warningAlert = document.getElementById('warningAlert');
+                    const criticalAlert = document.getElementById('criticalAlert');
+                    const dangerAlert = document.getElementById('dangerAlert');
+                    
+                    if (data.total_alerts > 0) {
+                        alertPanel.style.display = 'block';
+                        
+                        warningAlert.style.display = 'none';
+                        criticalAlert.style.display = 'none';
+                        dangerAlert.style.display = 'none';
+                        
+                        data.alerts.forEach(alert => {
+                            if (alert.level === 'warning') {
+                                document.getElementById('warningMessage').innerHTML = alert.message;
+                                warningAlert.style.display = 'block';
+                            } else if (alert.level === 'critical') {
+                                document.getElementById('criticalMessage').innerHTML = alert.message;
+                                criticalAlert.style.display = 'block';
+                            } else if (alert.level === 'danger') {
+                                document.getElementById('dangerMessage').innerHTML = alert.message;
+                                dangerAlert.style.display = 'block';
+                            }
+                        });
+                    } else {
+                        alertPanel.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Kļūda pārbaudot brīdinājumus:', error));
+        }
+        
         function loadOverallInfo() {
             document.getElementById('loading').classList.add('show');
             document.getElementById('infoMessage').style.display = 'none';
@@ -750,6 +820,8 @@
         
         document.addEventListener('DOMContentLoaded', function() {
             loadDays();
+            checkAlerts();
+            setInterval(checkAlerts, 30000);
         });
     </script>
 </body>

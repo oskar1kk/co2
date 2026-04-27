@@ -73,6 +73,37 @@
             font-weight: 300;
         }
 
+        .alert-panel {
+            margin: 20px 30px;
+            display: none;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .alert-critical {
+            background: #ffe5b4;
+            border-left: 4px solid #ff9800;
+        }
+
+        .alert-danger {
+            background: #ffcccc;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert strong {
+            font-size: 1.1em;
+        }
+
         .co2-info {
             background: #fff3e0;
             border-left: 4px solid #ff9800;
@@ -243,6 +274,19 @@
             <p>Interaktīva oglekļa dioksīda mērījumu vizualizācija ar krāsu kodētu gaisa kvalitāti</p>
         </div>
 
+        <!-- Alert System Panel -->
+        <div id="alertPanel" class="alert-panel">
+            <div id="warningAlert" class="alert alert-warning">
+                <strong>⚠️ BRĪDINĀJUMS:</strong> <span id="warningMessage"></span>
+            </div>
+            <div id="criticalAlert" class="alert alert-critical">
+                <strong>🔴 KRITISKS BRĪDINĀJUMS:</strong> <span id="criticalMessage"></span>
+            </div>
+            <div id="dangerAlert" class="alert alert-danger">
+                <strong>💀 BĪSTAMI:</strong> <span id="dangerMessage"></span>
+            </div>
+        </div>
+
         <div class="co2-info">
             <h3>🌿 CO₂ Līmeņa Vadlīnijas</h3>
             <div class="info-grid">
@@ -362,6 +406,41 @@
             document.getElementById('avgCo2').textContent = avg;
             document.getElementById('minCo2').textContent = min;
             document.getElementById('maxCo2').textContent = max;
+        }
+        
+        function checkAlerts() {
+            fetch('/api/check-alerts')
+                .then(response => response.json())
+                .then(data => {
+                    const alertPanel = document.getElementById('alertPanel');
+                    const warningAlert = document.getElementById('warningAlert');
+                    const criticalAlert = document.getElementById('criticalAlert');
+                    const dangerAlert = document.getElementById('dangerAlert');
+                    
+                    if (data.total_alerts > 0) {
+                        alertPanel.style.display = 'block';
+                        
+                        warningAlert.style.display = 'none';
+                        criticalAlert.style.display = 'none';
+                        dangerAlert.style.display = 'none';
+                        
+                        data.alerts.forEach(alert => {
+                            if (alert.level === 'warning') {
+                                document.getElementById('warningMessage').innerHTML = alert.message;
+                                warningAlert.style.display = 'block';
+                            } else if (alert.level === 'critical') {
+                                document.getElementById('criticalMessage').innerHTML = alert.message;
+                                criticalAlert.style.display = 'block';
+                            } else if (alert.level === 'danger') {
+                                document.getElementById('dangerMessage').innerHTML = alert.message;
+                                dangerAlert.style.display = 'block';
+                            }
+                        });
+                    } else {
+                        alertPanel.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Kļūda pārbaudot brīdinājumus:', error));
         }
         
         function initChart() {
@@ -489,6 +568,8 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             initChart();
+            checkAlerts();
+            setInterval(checkAlerts, 30000);
         });
     </script>
 </body>
